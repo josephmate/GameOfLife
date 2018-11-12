@@ -3,8 +3,8 @@
 
 
 #define EMPTY ' '
-#define ALIVE '+'
-#define DEAD '*'
+#define ALIVE 'o'
+#define DEAD 'x'
 
 struct Board {
 	char** data;
@@ -78,7 +78,7 @@ Board copyBoard(Board board) {
 
 
 int directions[3] = { -1, 0, 1 };
-int neighbours(Board board, int row, int col) {
+int countNeighbours(Board board, int row, int col) {
 	int count = 0;
 	
 	// instead of enumerating all the directions by hard coding them,
@@ -89,7 +89,7 @@ int neighbours(Board board, int row, int col) {
 	// ( 1,-1), ( 1, 0), ( 1, 1)
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
-			if (directions[i] != 0 && directions[j] != 0 // (0, 0) just looks at yourself, which is not a neighbour
+			if (!(directions[i] == 0 && directions[j] == 0) // (0, 0) just looks at yourself, which is not a neighbour
 				&& row + directions[i] >= 0 && row + directions[i] < board.rows // make sure the row direction doesn't go out of bounds
 				&& col + directions[j] >= 0 && col + directions[j] < board.cols // make sure the col direction doesn't go out of bounds
 				&& board.data[row + directions[i]][col + directions[j]] == ALIVE // does the cell contain someone alive?
@@ -104,7 +104,22 @@ int neighbours(Board board, int row, int col) {
 
 
 void iterate(Board currentStep, Board nextStep) {
-
+	for (int i = 0; i < currentStep.rows; i++) {
+		for (int j = 0; j < currentStep.cols; j++) {
+			int numNeighbours = countNeighbours(currentStep, i, j);
+			if (currentStep.data[i][j] == ALIVE) {
+				if (numNeighbours == 2 || numNeighbours == 3) {
+					nextStep.data[i][j] = ALIVE;
+				} else {
+					nextStep.data[i][j] = DEAD;
+				}
+			} else {
+				if (numNeighbours == 3) {
+					nextStep.data[i][j] = ALIVE;
+				}
+			}
+		}
+	}
 }
 
 #define STEPS 100
